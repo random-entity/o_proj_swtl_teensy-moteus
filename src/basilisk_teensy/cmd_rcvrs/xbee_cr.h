@@ -129,9 +129,7 @@ class XbeeCommandReceiver {
                        : "False");
     }
 
-    if (!(temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))) {
-      waiting_parse_ = false;
-    } else {
+    if (temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1))) {
       memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
       waiting_parse_ = true;
     }
