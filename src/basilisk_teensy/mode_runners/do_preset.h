@@ -20,6 +20,9 @@ void ModeRunners::DoPreset(Basilisk* b) {
   auto& m = b->cmd_.mode;
   auto idx = b->cmd_.do_preset.idx;  // Copy, not reference.
 
+  Serial.print("Entered DoPreset Mode, Preset idx ");
+  Serial.println(idx);
+
   switch (m) {
     case M::DoPreset: {
       if (1000 <= idx && idx <= 2999) {  // PPP Pivot range
@@ -48,7 +51,16 @@ void ModeRunners::DoPreset(Basilisk* b) {
         c.didimbal = digits[3] == 1 ? BOOL_L : BOOL_R;
         do_preset::pivot::tgt_yaw = (digits[2] - 3) * 0.125;
         c.tgt_yaw = [](Basilisk* b) {
-          return nearest_pmn(b->imu_.GetYaw(true), do_preset::pivot::tgt_yaw);
+          const auto cur_yaw = b->imu_.GetYaw(true);
+          auto ty = nearest_pmn(cur_yaw, do_preset::pivot::tgt_yaw);
+          if (b->cmd_.pivot.didimbal == BOOL_L &&
+              ty - cur_yaw < -(0.375 + 0.0625)) {
+            ty += 1.0;
+          } else if (b->cmd_.pivot.didimbal == BOOL_R &&
+                     ty - cur_yaw > 0.375 + 0.0625) {
+            ty -= 1.0;
+          }
+          return ty;
         };
         c.stride = 0.0;
         c.bend[IDX_L] = digits[1] == 1   ? 0.0
@@ -228,7 +240,7 @@ void ModeRunners::DoPreset(Basilisk* b) {
       auto* maybe_preset = SafeAt(Presets::presets, idx);
       if (maybe_preset) {
         (*maybe_preset)(b);
-      } else {
+      } else if (idx != 0) {
         Serial.println("Unregistered Preset index");
         m = M::SetMags_Init;
         for (uint8_t i = 0; i < 4; i++) {

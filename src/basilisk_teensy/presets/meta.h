@@ -10,7 +10,8 @@ struct Presets {
   inline static void Free(Basilisk* b) { b->cmd_.mode = M::Free; }
 
   inline static void CRMuxXbee(Basilisk* b) {
-    // Executer handles me.
+    // Executer handles the CRMux switching.
+    b->cmd_.mode = M::Idle_Init;
   }
   inline static void SetBaseYawZero(Basilisk* b) {
     b->cmd_.oneshots |= (1 << 1);

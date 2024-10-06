@@ -15,18 +15,11 @@ class Executer {
          (XbeeCommandReceiver::xbee_cmd_.decoded.mode ==
               static_cast<uint8_t>(Basilisk::Command::Mode::DoPreset) &&
           XbeeCommandReceiver::xbee_cmd_.decoded.u.do_preset
-                  .idx[b_->cfg_.suid] == 50002))) {
+                  .idx[b_->cfg_.suid - 1] == 50002))) {
       b_->cmd_.oneshots |= 1;
     }
 
     BasiliskOneshots::Shoot(b_);
-
-    for (uint8_t id = 0; id < 4; id++) {
-      if (b_->mags_.heavenfall_warning_[id]) {
-        b_->cmd_.mode = Basilisk::Command::Mode::Idle_Init;
-        return;
-      }
-    }
 
     b_->CommandBoth([](Servo* s) { s->SetQuery(); });
 
@@ -51,6 +44,16 @@ class Executer {
       // Serial.print("Mode ");
       // Serial.println(static_cast<uint8_t>(b_->cmd_.mode));
 #endif
+
+    for (uint8_t id = 0; id < 4; id++) {
+      if (b_->mags_.heavenfall_warning_[id]) {
+        Serial.print("Heavenfall ");
+        Serial.println(id);
+
+        b_->cmd_.mode = Basilisk::Command::Mode::Idle_Init;
+        break;
+      }
+    }
 
     auto* maybe_mode_runner = SafeAt(ModeRunners::mode_runners, b_->cmd_.mode);
     if (maybe_mode_runner) {

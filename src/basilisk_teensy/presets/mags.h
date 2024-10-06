@@ -34,12 +34,12 @@ void Presets::RandomMagsWeak(Basilisk* b) {
   b->cmd_.mode = M::RandomMags_Init;
   b->cmd_.random_mags.min_phase_dur = 1000;
   b->cmd_.random_mags.max_phase_dur = 3000;
-  b->cmd_.random_mags.dur = 5000;
+  b->cmd_.random_mags.dur = 10000;
 }
 
 void Presets::RandomMagsStrong(Basilisk* b) {
   b->cmd_.mode = M::RandomMags_Init;
   b->cmd_.random_mags.min_phase_dur = 10;
   b->cmd_.random_mags.max_phase_dur = 100;
-  b->cmd_.random_mags.dur = 5000;
+  b->cmd_.random_mags.dur = 10000;
 }

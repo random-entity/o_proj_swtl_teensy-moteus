@@ -71,13 +71,27 @@ class XbeeCommandReceiver {
 
         if (start < 4) return;
 
+        Serial.println("********************");
+        Serial.println("Start bytes received");
+        led_got_start_bytes = true;
+        led_got_entire_cmd = false;
+        led_got_my_cmd = false;
+        led_timeout_miss = false;
+
         receiving_ = true;
         buf_idx = 0;
         start_time_us = micros();
+      } else {
+        return;
       }
     }
 
-    if (micros() > start_time_us + 2000) {
+    if (micros() > start_time_us + 10000) {
+      led_timeout_miss = true;
+
+      // Not enough time if there are more Bailisks?
+      Serial.println("Timeout. Back to waiting");
+
       while (XBEE_SERIAL.available() > 0) XBEE_SERIAL.read();
       receiving_ = false;
       start = 0;
@@ -91,12 +105,14 @@ class XbeeCommandReceiver {
 
     if (buf_idx < XBEE_PACKET_LEN) return;
 
-    // Received full byte array within 2ms since start bytes reception.
+    // Received full byte array within time limit since start bytes reception.
+    led_got_entire_cmd = true;
 
     /* Print for debug */ {
       Serial.print("AheID ");
       Serial.print(b_->cfg_.suid);
-      Serial.print(" received full XbeeCommand within 2ms since start bytes");
+      Serial.print(
+          " received full XbeeCommand within time limit since start bytes");
       Serial.println();
 
       Serial.print("Command bytes -> ");
@@ -119,19 +135,22 @@ class XbeeCommandReceiver {
         Serial.println();
 
         Serial.print("My Preset index -> ");
-        Serial.print(temp_rbuf.decoded.u.do_preset.idx[b_->cfg_.suid]);
+        Serial.print(temp_rbuf.decoded.u.do_preset.idx[b_->cfg_.suid - 1]);
         Serial.println();
       }
 
       Serial.print("Is this Command for me? ");
-      Serial.print((temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))
+      Serial.print((temp_rbuf.decoded.suids & (1 << (b_->cfg_.suid - 1)))
                        ? "True"
                        : "False");
+      Serial.println();
     }
 
-    if (temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1))) {
+    if (temp_rbuf.decoded.suids & (1 << (b_->cfg_.suid - 1))) {
       memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
       waiting_parse_ = true;
+
+      led_got_my_cmd = true;
     }
 
     while (XBEE_SERIAL.available() > 0) XBEE_SERIAL.read();
@@ -140,6 +159,8 @@ class XbeeCommandReceiver {
   }
 
   static void Parse() {
+    Serial.println("Parse begin");
+
     static auto& x = xbee_cmd_.decoded;
     static auto& c = b_->cmd_;
     static auto& m = c.mode;
@@ -157,7 +178,8 @@ class XbeeCommandReceiver {
     }
 
     const auto maybe_new_mode = static_cast<M>(x.mode);
-    if (maybe_new_mode == M::DoPreset && x.u.do_preset.idx == 0)
+    if (maybe_new_mode == M::DoPreset &&
+        x.u.do_preset.idx[b_->cfg_.suid - 1] == 0)
       return;  // Do not even switch Mode.  Previous DoPreset Command
                // execution's future-chaining can be happening now.
 
@@ -166,7 +188,7 @@ class XbeeCommandReceiver {
       case M::DoPreset: {
         c.do_preset.idx = x.u.do_preset.idx[b_->cfg_.suid - 1];
 
-        Serial.print("Preset index ");
+        Serial.print("Starting Preset index ");
         Serial.print(c.do_preset.idx);
         Serial.println();
       } break;
@@ -196,7 +218,7 @@ class XbeeCommandReceiver {
 
   inline static union RecvBuf {
     struct Decoded {
-      uint16_t suid;
+      uint16_t suids;
       uint8_t oneshots;
       uint8_t mode;
       union {
@@ -221,6 +243,12 @@ class XbeeCommandReceiver {
 
   inline static bool receiving_ = false;
   inline static bool waiting_parse_ = false;
+
+  // Flags for LedReplySender
+  inline static bool led_got_start_bytes = false;
+  inline static bool led_got_entire_cmd = false;
+  inline static bool led_got_my_cmd = false;
+  inline static bool led_timeout_miss = false;
 
  private:
   inline static Basilisk* b_ = nullptr;
