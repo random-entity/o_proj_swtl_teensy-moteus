@@ -96,8 +96,8 @@ class XbeeCommandReceiver {
     /* Print for debug */ {
       Serial.print("AheID ");
       Serial.print(b_->cfg_.suid);
-      Serial.print(" received full XbeeCommand within 2ms since start
-      bytes"); Serial.println();
+      Serial.print(" received full XbeeCommand within 2ms since start bytes");
+      Serial.println();
 
       Serial.print("Command bytes -> ");
       for (size_t i = 0; i < XBEE_PACKET_LEN; i++) {
