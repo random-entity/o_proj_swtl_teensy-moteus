@@ -29,90 +29,121 @@ class XbeeCommandReceiver {
   }
 
   void Run() {
-    static uint8_t start = 0;
-    static RecvBuf temp_rbuf;
-    static uint8_t buf_idx;
-    static uint32_t start_time_us;
+    if (XBEE_SERIAL.available() >= 4 + XBEE_PACKET_LEN) {
+      uint8_t buf[4 + XBEE_PACKET_LEN];
+      for (uint8_t i = 0; i < 4 + XBEE_PACKET_LEN; i++) {
+        buf[i] = XBEE_SERIAL.read();
+      }
 
-    if (!receiving_) {
-      if (XBEE_SERIAL.available() > 0) {
-        uint8_t rbyte = XBEE_SERIAL.read();
-        if (rbyte == 255) {
-          start++;
-        } else {
-          start = 0;
+      for (uint8_t i = 0; i < 4; i++) {
+        if (buf[i] != 255) {
+          while (XBEE_SERIAL.available()) {
+            XBEE_SERIAL.read();
+          }
+          return;
         }
+      }
 
-        if (start < 4) return;
+      RecvBuf temp_rbuf;
+      memcpy(temp_rbuf.raw_bytes, buf + 4, XBEE_PACKET_LEN);
 
-        receiving_ = true;
-        buf_idx = 0;
-        start_time_us = micros();
+      if (temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1))) {
+        memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
+        waiting_parse_ = true;
+      }
+
+      while (XBEE_SERIAL.available()) {
+        XBEE_SERIAL.read();
       }
     }
 
-    if (micros() > start_time_us + 2000) {
-      XBEE_SERIAL.clear();
-      receiving_ = false;
-      start = 0;
-      return;
-    }
+    return;
+    ////////////////////////////////////////////////////////
 
-    while (XBEE_SERIAL.available() > 0 && buf_idx < XBEE_PACKET_LEN) {
-      temp_rbuf.raw_bytes[buf_idx] = XBEE_SERIAL.read();
-      buf_idx++;
-    }
+    // static uint8_t start = 0;
+    // static RecvBuf temp_rbuf;
+    // static uint8_t buf_idx;
+    // static uint32_t start_time_us;
 
-    if (buf_idx < XBEE_PACKET_LEN) return;
+    // if (!receiving_) {
+    //   if (XBEE_SERIAL.available() > 0) {
+    //     uint8_t rbyte = XBEE_SERIAL.read();
+    //     if (rbyte == 255) {
+    //       start++;
+    //     } else {
+    //       start = 0;
+    //     }
 
-    // Received full byte array within 2ms since start bytes reception.
+    //     if (start < 4) return;
 
-    /* Print for debug */ {
-      Serial.print("AheID ");
-      Serial.print(b_->cfg_.suid);
-      Serial.print(" received full XbeeCommand within 2ms since start bytes");
-      Serial.println();
+    //     receiving_ = true;
+    //     buf_idx = 0;
+    //     start_time_us = micros();
+    //   }
+    // }
 
-      Serial.print("Command bytes -> ");
-      for (size_t i = 0; i < XBEE_PACKET_LEN; i++) {
-        Serial.print(temp_rbuf.raw_bytes[i]);
-        Serial.print(", ");
-      }
-      Serial.println();
+    // if (micros() > start_time_us + 2000) {
+    //   XBEE_SERIAL.clear();
+    //   receiving_ = false;
+    //   start = 0;
+    //   return;
+    // }
 
-      Serial.print("Mode -> ");
-      Serial.print(temp_rbuf.decoded.mode);
-      Serial.println();
+    // while (XBEE_SERIAL.available() > 0 && buf_idx < XBEE_PACKET_LEN) {
+    //   temp_rbuf.raw_bytes[buf_idx] = XBEE_SERIAL.read();
+    //   buf_idx++;
+    // }
 
-      if (temp_rbuf.decoded.mode == static_cast<uint8_t>(M::DoPreset)) {
-        Serial.print("Preset indices for all Ahes -> ");
-        for (uint8_t i = 0; i < 13; i++) {
-          Serial.print(temp_rbuf.decoded.u.do_preset.idx[i]);
-          Serial.print(", ");
-        }
-        Serial.println();
+    // if (buf_idx < XBEE_PACKET_LEN) return;
 
-        Serial.print("My Preset index -> ");
-        Serial.print(temp_rbuf.decoded.u.do_preset.idx[b_->cfg_.suid]);
-        Serial.println();
-      }
+    // // Received full byte array within 2ms since start bytes reception.
 
-      Serial.print("Is this Command for me? ");
-      Serial.print((temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))
-                       ? "True"
-                       : "False");
-    }
+    // /* Print for debug */ {
+    //   Serial.print("AheID ");
+    //   Serial.print(b_->cfg_.suid);
+    //   Serial.print(" received full XbeeCommand within 2ms since start
+    //   bytes"); Serial.println();
 
-    if (!(temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))) {
-      waiting_parse_ = false;
-    } else {
-      memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
-      waiting_parse_ = true;
-    }
+    //   Serial.print("Command bytes -> ");
+    //   for (size_t i = 0; i < XBEE_PACKET_LEN; i++) {
+    //     Serial.print(temp_rbuf.raw_bytes[i]);
+    //     Serial.print(", ");
+    //   }
+    //   Serial.println();
 
-    XBEE_SERIAL.clear();
-    receiving_ = false;
-    start = 0;
+    //   Serial.print("Mode -> ");
+    //   Serial.print(temp_rbuf.decoded.mode);
+    //   Serial.println();
+
+    //   if (temp_rbuf.decoded.mode == static_cast<uint8_t>(M::DoPreset)) {
+    //     Serial.print("Preset indices for all Ahes -> ");
+    //     for (uint8_t i = 0; i < 13; i++) {
+    //       Serial.print(temp_rbuf.decoded.u.do_preset.idx[i]);
+    //       Serial.print(", ");
+    //     }
+    //     Serial.println();
+
+    //     Serial.print("My Preset index -> ");
+    //     Serial.print(temp_rbuf.decoded.u.do_preset.idx[b_->cfg_.suid]);
+    //     Serial.println();
+    //   }
+
+    //   Serial.print("Is this Command for me? ");
+    //   Serial.print((temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))
+    //                    ? "True"
+    //                    : "False");
+    // }
+
+    // if (!(temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1)))) {
+    //   waiting_parse_ = false;
+    // } else {
+    //   memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
+    //   waiting_parse_ = true;
+    // }
+
+    // XBEE_SERIAL.clear();
+    // receiving_ = false;
+    // start = 0;
   }
 
   static void Parse() {
