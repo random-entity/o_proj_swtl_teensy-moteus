@@ -5,10 +5,12 @@
 struct BasiliskOneshots {
   static void CRMuxXbee(Basilisk*);
   static void SetBaseYaw(Basilisk*);
+  static void ReplyNext(Basilisk*);
 
   static inline const std::map<uint8_t, void (*)(Basilisk*)> oneshots = {
-      {0, &CRMuxXbee},
-      {1, &SetBaseYaw},
+      {ONESHOT_CRMuxXbee, &CRMuxXbee},
+      {ONESHOT_SetBaseYaw, &SetBaseYaw},
+      {ONESHOT_ReplyNext, &ReplyNext},
   };
 
   static void Shoot(Basilisk* b) {
@@ -20,6 +22,9 @@ struct BasiliskOneshots {
         }
       }
     }
-    b->cmd_.oneshots = 0;
+
+    // It is each Oneshot method's responsibility to reset corresponding bit to
+    // zero since there may be time-based Oneshots like ReplyNext.
+    // b->cmd_.oneshots = 0;
   }
 };

@@ -8,6 +8,7 @@
 #include "../components/servo.h"
 #include "../globals.h"
 #include "../helpers/utils.h"
+#include "../roster/db.h"
 
 struct ModeRunners;
 
@@ -37,6 +38,7 @@ class Basilisk {
   } cfg_;
 
   const double gr_ = 21.0;  // delta_rotor = delta_output * gear_ratio
+  const double collision_thr = 100.0;
   const PmCmd* const pm_cmd_template_;
 
   /////////////////
@@ -64,7 +66,13 @@ class Basilisk {
         lego_{cfg.lego.pin_l, cfg.lego.pin_r},
         mags_{&lego_,                            //
               cfg.mags.pin_la, cfg.mags.pin_lt,  //
-              cfg.mags.pin_ra, cfg.mags.pin_rt} {}
+              cfg.mags.pin_ra, cfg.mags.pin_rt} {
+    rpl_.b = this;
+    rpl_.suid = &cfg_.suid;
+    rpl_.mode = &cmd_.mode;
+    rpl_.lpsx = &lps_.x_;
+    rpl_.lpsy = &lps_.y_;
+  }
 
   ////////////////////////////////////////////////////////////
   // Setup method (should be called in setup() before use): //
@@ -123,10 +131,7 @@ class Basilisk {
   enum class CRMux : bool { Xbee, Neokey } crmux_ = CRMux::Xbee;
 
   struct Command {
-    uint8_t oneshots;  // bit 0: CRMuxXbee
-                       // bit 1: SetBaseYaw
-                       // bit 2: Inspire
-                       // bit 7: ReplyNow
+    uint8_t oneshots;  // Refer to utils.h for bit mapping.
 
     struct SetBaseYaw {
       double offset;
@@ -225,6 +230,7 @@ class Basilisk {
       Orbit = 24,
       Diamond = 25,
       RandomWalk = 26,
+      BounceWalk = 27,
 
       /* Gee: */
       Shear_Init = 250,
@@ -386,6 +392,10 @@ class Basilisk {
       uint8_t steps;
     } diamond;
 
+    struct BounceWalk {
+      double init_tgt_yaw;
+    } bounce_walk;
+
     struct Shear {
       AnkToe fix_which;
       Phi tgt_phi;
@@ -413,10 +423,14 @@ class Basilisk {
   } cmd_;
 
   struct Reply {
-    Mode* mode;
+    Basilisk* b;
+    uint8_t* suid;
+    Command::Mode* mode;
     double* lpsx;
     double* lpsy;
-    double* yaw;
+    double yaw() { return b->imu_.GetYaw(true); }
+
+    bool notnull() { return !!b && !!suid && !!mode && !!lpsx && !!lpsy; }
   } rpl_;
 
   ///////////////////
@@ -425,6 +439,23 @@ class Basilisk {
   template <typename ServoCommand>
   void CommandBoth(ServoCommand c) {
     for (auto* s : s_) c(s);
+  }
+
+  uint16_t Collision() {
+    uint16_t collision = 0;
+
+    for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
+      if (other_suid == cfg_.suid) continue;
+
+      const auto other = roster::db[other_suid - 1];
+      const auto other_pos = Vec2{other.x, other.y};
+      const auto dist = lps_.GetPos().dist(other_pos);
+      if (dist < collision_thr) {
+        collision |= (1 << (other_suid - 1));
+      }
+    }
+
+    return collision;
   }
 
   void Print() {

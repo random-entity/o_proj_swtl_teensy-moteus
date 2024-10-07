@@ -99,4 +99,12 @@ void Sufi(Basilisk* b) {
   c.steps = -1;
 }
 
+void BounceWalk(Basilisk* b) {
+  auto& m = b->cmd_.mode;
+  auto& c = b->cmd_.bounce_walk;
+
+  m = M::BounceWalk;
+  c.init_tgt_yaw = random(360) / 360.0;
+}
+
 }  // namespace tests

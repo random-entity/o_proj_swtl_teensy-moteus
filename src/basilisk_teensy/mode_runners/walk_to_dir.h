@@ -16,7 +16,7 @@ void ModeRunners::WalkToDir(Basilisk* b) {
       m = M::Walk;
       w.init_didimbal = c.init_didimbal;
 
-      for (uint8_t f : IDX_LR) {
+      for (LRIdx f : IDX_LR) {
         if (isnan(c.tgt_yaw)) {
           walk_to_dir::tgt_yaw = b->imu_.GetYaw(true);
           w.tgt_yaw[f] = [](Basilisk* b) { return walk_to_dir::tgt_yaw; };
@@ -38,7 +38,9 @@ void ModeRunners::WalkToDir(Basilisk* b) {
         w.interval[f] = c.interval;
       }
       w.steps = c.steps;
-      w.exit_condition = [](Basilisk* b) { return !b->lps_.Bound(); };
+      w.exit_condition = [](Basilisk* b) {
+        return !(b->lps_.Bound()) || !!(b->Collision());
+      };
     } break;
     default:
       break;

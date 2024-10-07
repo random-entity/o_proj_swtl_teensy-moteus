@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../roster/db.h"
 #include "../servo_units/basilisk.h"
 
 #define XBEE_SERIAL Serial4
@@ -29,32 +30,6 @@ class XbeeCommandReceiver {
   }
 
   void Run() {
-    // if (XBEE_SERIAL.available() >= 4 + XBEE_PACKET_LEN) {
-    //   uint8_t buf[4 + XBEE_PACKET_LEN];
-    //   for (uint8_t i = 0; i < 4 + XBEE_PACKET_LEN; i++) {
-    //     buf[i] = XBEE_SERIAL.read();
-    //   }
-    //   for (uint8_t i = 0; i < 4; i++) {
-    //     if (buf[i] != 255) {
-    //       while (XBEE_SERIAL.available()) {
-    //         XBEE_SERIAL.read();
-    //       }
-    //       return;
-    //     }
-    //   }
-    //   RecvBuf temp_rbuf;
-    //   memcpy(temp_rbuf.raw_bytes, buf + 4, XBEE_PACKET_LEN);
-    //   if (temp_rbuf.decoded.suid & (1 << (b_->cfg_.suid - 1))) {
-    //     memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
-    //     waiting_parse_ = true;
-    //   }
-    //   while (XBEE_SERIAL.available()) {
-    //     XBEE_SERIAL.read();
-    //   }
-    // }
-    // return;
-    ////////////////////////////////////////////////////////
-
     static uint8_t start = 0;
     static RecvBuf temp_rbuf;
     static uint8_t buf_idx;
@@ -122,7 +97,9 @@ class XbeeCommandReceiver {
       }
       Serial.println();
 
-      Serial.print("Mode -> ");
+      Serial.print("Oneshots -> ");
+      Serial.print(temp_rbuf.decoded.oneshots);
+      Serial.print("; Mode -> ");
       Serial.print(temp_rbuf.decoded.mode);
       Serial.println();
 
@@ -146,8 +123,52 @@ class XbeeCommandReceiver {
       Serial.println();
     }
 
+    if (temp_rbuf.decoded.oneshots & (1 << ONESHOT_SaveOthersReply)) {
+      // This is other's Reply. Parse and save to roster, then immediately
+      // go back to waiting start bytes.
+
+      for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
+        if (temp_rbuf.decoded.suids & (1 << (other_suid - 1))) {
+          roster::db[other_suid - 1].x =
+              temp_rbuf.decoded.u.save_others_reply.lpsx;
+          roster::db[other_suid - 1].y =
+              temp_rbuf.decoded.u.save_others_reply.lpsy;
+          roster::db[other_suid - 1].yaw =
+              temp_rbuf.decoded.u.save_others_reply.yaw;
+
+          {
+            Serial.print("Got Reply from SUID ");
+            Serial.print(other_suid);
+            Serial.print(" -> ");
+            Serial.print(" x ");
+            Serial.print(roster::db[other_suid - 1].x);
+            Serial.print(", y ");
+            Serial.print(roster::db[other_suid - 1].y);
+            Serial.print(", yaw ");
+            Serial.print(roster::db[other_suid - 1].yaw);
+            Serial.println();
+          }
+
+          break;  // There should be no Reply with multiple SUIDs.
+        }
+      }
+
+      while (XBEE_SERIAL.available() > 0) XBEE_SERIAL.read();
+      receiving_ = false;
+      start = 0;
+      return;
+    }
+
     if (temp_rbuf.decoded.suids & (1 << (b_->cfg_.suid - 1))) {
-      memcpy(xbee_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
+      // This Command is for me.
+
+      if (temp_rbuf.decoded.oneshots & (1 << ONESHOT_ReplyNext)) {
+        // This Command is a poll. Save time for synchronization.
+        waiting_xb_rpl_send_ = true;
+        polled_time_us = micros();
+      }
+
+      memcpy(xb_cmd_.raw_bytes, temp_rbuf.raw_bytes, XBEE_PACKET_LEN);
       waiting_parse_ = true;
 
       led_got_my_cmd = true;
@@ -158,17 +179,17 @@ class XbeeCommandReceiver {
     start = 0;
   }
 
-  static void Parse() {
+  inline static void Parse() {
     Serial.println("Parse begin");
 
-    static auto& x = xbee_cmd_.decoded;
+    static auto& x = xb_cmd_.decoded;
     static auto& c = b_->cmd_;
     static auto& m = c.mode;
 
     if (x.oneshots) {
       c.oneshots = x.oneshots;
 
-      if (x.oneshots & (1 << 1)) {
+      if (x.oneshots & (1 << ONESHOT_SetBaseYaw)) {
         c.set_base_yaw.offset = static_cast<double>(x.u.set_base_yaw.offset);
       }
 
@@ -188,7 +209,7 @@ class XbeeCommandReceiver {
       case M::DoPreset: {
         c.do_preset.idx = x.u.do_preset.idx[b_->cfg_.suid - 1];
 
-        Serial.print("Starting Preset index ");
+        Serial.print("Copied to memory, Preset index ");
         Serial.print(c.do_preset.idx);
         Serial.println();
       } break;
@@ -226,6 +247,11 @@ class XbeeCommandReceiver {
           float offset;
         } __attribute__((packed)) set_base_yaw;
         struct {
+          float lpsx;
+          float lpsy;
+          float yaw;
+        } __attribute__((packed)) save_others_reply;
+        struct {
           uint16_t idx[13];  // The Goguma version of DoPreset protocol.
         } __attribute__((packed)) do_preset;
         struct {
@@ -239,10 +265,12 @@ class XbeeCommandReceiver {
       } u;
     } __attribute__((packed)) decoded;
     uint8_t raw_bytes[XBEE_PACKET_LEN];
-  } xbee_cmd_;
+  } xb_cmd_;
 
   inline static bool receiving_ = false;
   inline static bool waiting_parse_ = false;
+  inline static bool waiting_xb_rpl_send_ = false;
+  inline static uint32_t polled_time_us;
 
   // Flags for LedReplySender
   inline static bool led_got_start_bytes = false;

@@ -11,12 +11,13 @@ class Executer {
 
   void Run() {
     if (!XbeeCommandReceiver::receiving_ &&
-        (XbeeCommandReceiver::xbee_cmd_.decoded.oneshots & 1 ||
-         (XbeeCommandReceiver::xbee_cmd_.decoded.mode ==
+        (XbeeCommandReceiver::xb_cmd_.decoded.oneshots &
+             (1 << ONESHOT_CRMuxXbee) ||
+         (XbeeCommandReceiver::xb_cmd_.decoded.mode ==
               static_cast<uint8_t>(Basilisk::Command::Mode::DoPreset) &&
-          XbeeCommandReceiver::xbee_cmd_.decoded.u.do_preset
+          XbeeCommandReceiver::xb_cmd_.decoded.u.do_preset
                   .idx[b_->cfg_.suid - 1] == 50002))) {
-      b_->cmd_.oneshots |= 1;
+      b_->cmd_.oneshots |= (1 << ONESHOT_CRMuxXbee);
     }
 
     BasiliskOneshots::Shoot(b_);

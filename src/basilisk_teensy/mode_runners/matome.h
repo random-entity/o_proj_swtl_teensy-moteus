@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bounce_walk.h"
 #include "diamond.h"
 #include "do_preset.h"
 #include "free.h"

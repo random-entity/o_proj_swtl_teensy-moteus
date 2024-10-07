@@ -14,7 +14,7 @@ void ModeRunners::PivSeq(Basilisk* b) {
       m = M::PivSeq_Step;
     } break;
     case M::PivSeq_Step: {
-      if (c.exit_condition(b) || cur_step >= c.steps) {
+      if ((c.exit_condition && c.exit_condition(b)) || cur_step >= c.steps) {
         m = c.exit_to_mode;
         return;
       }

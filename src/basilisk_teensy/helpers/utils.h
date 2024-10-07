@@ -11,6 +11,8 @@
 using LR = bool;
 #define BOOL_L (false)
 #define BOOL_R (true)
+
+using LRIdx = uint8_t;
 #define IDX_L (0)
 #define IDX_R (1)
 #define IDX_LR {0, 1}
@@ -19,8 +21,15 @@ using AnkToe = bool;
 #define BOOL_ANK (false)
 #define BOOL_TOE (true)
 
+using AttRel = bool;
 #define BOOL_ATTACH (true)
 #define BOOL_RELEASE (false)
+
+#define ONESHOT_CRMuxXbee (0)
+#define ONESHOT_SetBaseYaw (1)
+#define ONESHOT_Inspire (2)
+#define ONESHOT_ReplyNext (3)
+#define ONESHOT_SaveOthersReply (4)
 
 const uint64_t one_uint64 = static_cast<uint64_t>(1);
 
@@ -80,7 +89,7 @@ struct Vec2 {
 
   Vec2(const double& _x, const double& _y) : x{_x}, y{_y} {}
 
-  Vec2(const double& arg) : x{cos(arg)}, y{sin(arg)} {}
+  Vec2(const double& arg) : x{cos(TWO_PI * arg)}, y{sin(TWO_PI * arg)} {}
 
   bool isnan() const { return ::isnan(x) || ::isnan(y); }
 

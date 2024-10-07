@@ -98,9 +98,12 @@ class Lps {
  public:
   Vec2 GetPos() { return Vec2{x_, y_}; }
 
+  bool BoundMinX() { return cfg_.minx < x_; }
+  bool BoundMaxX() { return x_ < cfg_.maxx; }
+  bool BoundMinY() { return cfg_.miny < y_; }
+  bool BoundMaxY() { return y_ < cfg_.maxy; }
   bool Bound() {
-    return cfg_.minx < x_ && x_ < cfg_.maxx &&  //
-           cfg_.miny < y_ && y_ < cfg_.maxy;
+    return BoundMinX() && BoundMaxX() && BoundMinY() && BoundMaxY();
   }
 
   uint8_t dists_raw_[3] = {0, 0, 0};

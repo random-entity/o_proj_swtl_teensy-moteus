@@ -3,7 +3,7 @@
 #include "meta.h"
 
 namespace walk_to_pos {
-bool moonwalk = false;
+bool moonwalk;
 }  // namespace walk_to_pos
 
 void ModeRunners::WalkToPos(Basilisk* b) {
