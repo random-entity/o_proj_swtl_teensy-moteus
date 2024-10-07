@@ -12,12 +12,12 @@ class NeokeyCommandReceiver {
     nk_cmd_ = key + 1;
     b_->crmux_ = Basilisk::CRMux::Neokey;
 
-#if I_WANT_DEBUG
+// #if I_WANT_DEBUG
     Serial.print("NeokeyCommandReceiver: Key rose: ");
     Serial.print(key);
     Serial.print(", nk_cmd_: ");
     Serial.println(nk_cmd_);
-#endif
+// #endif
   };
 
   // Should be called before use.

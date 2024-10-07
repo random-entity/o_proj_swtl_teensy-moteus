@@ -11,6 +11,8 @@ struct Presets {
 
   inline static void CRMuxXbee(Basilisk* b) {
     // Executer handles the CRMux switching.
+    XbeeCommandReceiver::xb_cmd_.decoded.mode =
+        static_cast<uint8_t>(M::Idle_Nop);
     b->cmd_.mode = M::Idle_Init;
   }
   inline static void SetBaseYawZero(Basilisk* b) {

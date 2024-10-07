@@ -1,10 +1,16 @@
 #pragma once
 
+#include "../roster/db.h"
 #include "../servo_units/basilisk.h"
 
 void SerialReplySender(Basilisk& b) {
   // Servo Replies
   // b.CommandBoth([](Servo* s) { s->Print(); });
+
+  // Mode
+  Serial.print("Mode -> ");
+  Serial.print(static_cast<uint8_t>(b.cmd_.mode));
+  Serial.println();
 
   // Servo outputs
   Serial.print("phi_l:");
@@ -74,4 +80,18 @@ void SerialReplySender(Basilisk& b) {
   // Serial.print("time_since_last_attach[3]=");
   // Serial.print(b.mags_.time_since_last_attach_[3]);
   // Serial.println();
+
+  // Roster
+  Serial.println("Roster");
+  for (uint8_t suid = 1; suid <= 13; suid++) {
+    Serial.print(suid);
+    Serial.print(" -> ");
+    Serial.print(roster::db[suid - 1].x);
+    Serial.print(", ");
+    Serial.print(roster::db[suid - 1].y);
+    Serial.print(", ");
+    Serial.print(roster::db[suid - 1].yaw);
+    Serial.print(";  ");
+  }
+  Serial.println();
 }

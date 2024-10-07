@@ -1,8 +1,12 @@
 #pragma once
 
+#ifndef NaN
+#define NaN (0.0 / 0.0)
+#endif
+
 struct PosYaw {
-  double x, y;
-  double yaw;
+  double x = NaN, y = NaN;
+  double yaw = NaN;
 };
 
 namespace roster {
