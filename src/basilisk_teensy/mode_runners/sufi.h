@@ -33,6 +33,7 @@ void ModeRunners::Sufi(Basilisk* b) {
         auto& c = b->cmd_.sufi;
         return abs(b->imu_.GetYaw(true) - c.dest_yaw) < c.exit_thr;
       };
+      w.exit_to_mode = M::Idle_Init;
     } break;
     default:
       break;

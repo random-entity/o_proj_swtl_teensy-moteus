@@ -47,7 +47,7 @@ class Lps {
       return false;
     }
 
-    for (auto& dist_sm : dists_sm_) dist_sm.begin(SMOOTHED_AVERAGE, 10);
+    for (auto& dist_sm : dists_sm_) dist_sm.begin(SMOOTHED_AVERAGE, 5);
 
     Serial.println("LPS: Setup complete");
     return true;
@@ -104,6 +104,35 @@ class Lps {
   bool BoundMaxY() { return y_ < cfg_.maxy; }
   bool Bound() {
     return BoundMinX() && BoundMaxX() && BoundMinY() && BoundMaxY();
+  }
+
+  bool TrespassedMinX() {
+    static bool prev = false;
+    const auto now = BoundMinX();
+    const auto result = !prev && now;
+    prev = now;
+    return result;
+  }
+  bool TrespassedMaxX() {
+    static bool prev = false;
+    const auto now = BoundMaxX();
+    const auto result = !prev && now;
+    prev = now;
+    return result;
+  }
+  bool TrespassedMinY() {
+    static bool prev = false;
+    const auto now = BoundMinY();
+    const auto result = !prev && now;
+    prev = now;
+    return result;
+  }
+  bool TrespassedMaxY() {
+    static bool prev = false;
+    const auto now = BoundMaxY();
+    const auto result = !prev && now;
+    prev = now;
+    return result;
   }
 
   uint8_t dists_raw_[3] = {0, 0, 0};

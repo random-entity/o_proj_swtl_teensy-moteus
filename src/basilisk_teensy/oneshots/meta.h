@@ -5,12 +5,10 @@
 struct BasiliskOneshots {
   static void CRMuxXbee(Basilisk*);
   static void SetBaseYaw(Basilisk*);
-  static void ReplyNext(Basilisk*);
 
   static inline const std::map<uint8_t, void (*)(Basilisk*)> oneshots = {
       {ONESHOT_CRMuxXbee, &CRMuxXbee},
       {ONESHOT_SetBaseYaw, &SetBaseYaw},
-      {ONESHOT_ReplyNext, &ReplyNext},
   };
 
   static void Shoot(Basilisk* b) {

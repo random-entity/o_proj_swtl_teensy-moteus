@@ -49,7 +49,8 @@ struct ModeRunners {
       {M::Sufi, &Sufi},
       {M::Orbit, &Orbit},
       {M::Diamond, &Diamond},
-      {M::BounceWalk, &BounceWalk},
+      {M::BounceWalk_Init, &BounceWalk},
+      {M::BounceWalk_Reinit, &BounceWalk},
       {M::Shear_Init, &Shear},
       {M::Shear_Move, &Shear},
   };

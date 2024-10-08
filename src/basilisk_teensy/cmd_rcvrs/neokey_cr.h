@@ -12,12 +12,10 @@ class NeokeyCommandReceiver {
     nk_cmd_ = key + 1;
     b_->crmux_ = Basilisk::CRMux::Neokey;
 
-// #if I_WANT_DEBUG
     Serial.print("NeokeyCommandReceiver: Key rose: ");
     Serial.print(key);
     Serial.print(", nk_cmd_: ");
     Serial.println(nk_cmd_);
-// #endif
   };
 
   // Should be called before use.
@@ -61,7 +59,7 @@ class NeokeyCommandReceiver {
         c.set_base_yaw.offset = 0.0;
       } break;
       case 4: {
-        tests::Sufi(b_);
+        tests::BounceWalk(b_);
       } break;
       default: {  // Whatever left keys are assigned Idle Mode.
         m = M::Idle_Init;

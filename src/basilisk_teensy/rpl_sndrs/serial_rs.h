@@ -4,8 +4,11 @@
 #include "../servo_units/basilisk.h"
 
 void SerialReplySender(Basilisk& b) {
+  Serial.println("******************");
+  Serial.println("SerialReplySender:");
+
   // Servo Replies
-  // b.CommandBoth([](Servo* s) { s->Print(); });
+  b.CommandBoth([](Servo* s) { s->Print(); });
 
   // Mode
   Serial.print("Mode -> ");
@@ -29,24 +32,24 @@ void SerialReplySender(Basilisk& b) {
   Serial.println();
 
   // LPS debug
-  // Serial.print("b.lps_.dists_raw_[0]:");
-  // Serial.print(b.lps_.dists_raw_[0]);
-  // Serial.print(",");
-  // Serial.print("b.lps_.dists_raw_[1]:");
-  // Serial.print(b.lps_.dists_raw_[1]);
-  // Serial.print(",");
-  // Serial.print("b.lps_.dists_raw_[2]:");
-  // Serial.print(b.lps_.dists_raw_[2]);
-  // Serial.println();
-  // Serial.print("b.lps_.error_.bytes[0]:");
-  // Serial.print(b.lps_.error_.bytes[0]);
-  // Serial.print(",");
-  // Serial.print("b.lps_.error_.bytes[1]:");
-  // Serial.print(b.lps_.error_.bytes[1]);
-  // Serial.print(",");
-  // Serial.print("b.lps_.error_.bytes[2]:");
-  // Serial.print(b.lps_.error_.bytes[2]);
-  // Serial.println();
+  Serial.print("b.lps_.dists_raw_[0]:");
+  Serial.print(b.lps_.dists_raw_[0]);
+  Serial.print(",");
+  Serial.print("b.lps_.dists_raw_[1]:");
+  Serial.print(b.lps_.dists_raw_[1]);
+  Serial.print(",");
+  Serial.print("b.lps_.dists_raw_[2]:");
+  Serial.print(b.lps_.dists_raw_[2]);
+  Serial.println();
+  Serial.print("b.lps_.error_.bytes[0]:");
+  Serial.print(b.lps_.error_.bytes[0]);
+  Serial.print(",");
+  Serial.print("b.lps_.error_.bytes[1]:");
+  Serial.print(b.lps_.error_.bytes[1]);
+  Serial.print(",");
+  Serial.print("b.lps_.error_.bytes[2]:");
+  Serial.print(b.lps_.error_.bytes[2]);
+  Serial.println();
 
   // IMU orientation
   // Serial.print("roll:");
@@ -92,6 +95,7 @@ void SerialReplySender(Basilisk& b) {
     Serial.print(", ");
     Serial.print(roster::db[suid - 1].yaw);
     Serial.print(";  ");
+    if (suid == 7) Serial.println();
   }
   Serial.println();
 }

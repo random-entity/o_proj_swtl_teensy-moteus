@@ -66,7 +66,7 @@ class Executer {
     if (maybe_mode_runner) {
       (*maybe_mode_runner)(b_);
     } else {
-      Serial.println("Mode NOT registered to ModeRunners::mode_runners");
+      // Serial.println("Mode NOT registered to ModeRunners::mode_runners");
     }
   }
 

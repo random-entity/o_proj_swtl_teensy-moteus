@@ -5,7 +5,7 @@
 namespace bounce_walk {
 double tgt_yaw;
 bool moonwalk;
-uint32_t muteki_until = 0;
+bool reinit;
 }  // namespace bounce_walk
 
 void ModeRunners::BounceWalk(Basilisk* b) {
@@ -14,9 +14,11 @@ void ModeRunners::BounceWalk(Basilisk* b) {
   auto& w = b->cmd_.walk;
 
   switch (m) {
-    case M::BounceWalk: {
-      m = M::Walk;
+    case M::BounceWalk_Init: {
+      bounce_walk::reinit = false;
       bounce_walk::tgt_yaw = c.init_tgt_yaw;
+
+      m = M::Walk;
       w.init_didimbal = BOOL_L;
       for (LRIdx f : IDX_LR) {
         w.tgt_yaw[f] = [](Basilisk* b) {
@@ -44,39 +46,89 @@ void ModeRunners::BounceWalk(Basilisk* b) {
       }
       w.steps = -1;
       w.exit_condition = [](Basilisk* b) {
-        if (millis() <= bounce_walk::muteki_until) return false;
+        // if (millis() <= bounce_walk::muteki_until) {
+        //   // Serial.println("MUTEKI");
+        //   return false;
+        // }
+        // bool start_muteki = false;
+        // const auto collision = b->Collision();
+        // Vec2 yaw_sum{};
+        // for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
+        //   if (other_suid == b->cfg_.suid) continue;
+        //   if (!(collision & (1 << (other_suid - 1)))) continue;
+        //   yaw_sum.add(Vec2{roster::db[other_suid - 1].yaw});
+        //   start_muteki = true;
+        // }
+        // if (start_muteki) {
+        //   bounce_walk::tgt_yaw = yaw_sum.arg();
+        // }
+        // if ((b->lps_.TrespassedMinX() &&
+        //      abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) >= 0.25) ||
+        //     (b->lps_.TrespassedMaxX() &&
+        //      abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) <= 0.25)) {
+        //   bounce_walk::tgt_yaw = 0.5 - bounce_walk::tgt_yaw;
+        //   for (int i = 0; i < 10; i++) Serial.println("TrespassedX");
+        //   Serial.print("Bouced tgt_yaw -> ");
+        //   Serial.println(bounce_walk::tgt_yaw);
+        //   start_muteki = true;
+        // }
+        // if (b->lps_.TrespassedMinY() || b->lps_.TrespassedMaxY()) {
+        //   bounce_walk::tgt_yaw *= -1.0;
+        //   for (int i = 0; i < 10; i++) Serial.println("TrespassedY");
+        //   Serial.print("Bouced tgt_yaw -> ");
+        //   Serial.println(bounce_walk::tgt_yaw);
+        //   start_muteki = true;
+        // }
 
-        bool start_muteki = false;
+        if (bounce_walk::reinit) return true;
 
-        const auto collision = b->Collision();
-        Vec2 yaw_sum{};
-
-        for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
-          if (other_suid == b->cfg_.suid) continue;
-          if (!(collision & (1 << (other_suid - 1)))) continue;
-
-          yaw_sum.add(Vec2{roster::db[other_suid - 1].yaw});
-          start_muteki = true;
-        }
-        if (start_muteki) {
-          bounce_walk::tgt_yaw = yaw_sum.arg();
-        }
-
-        if (!b->lps_.BoundMinX() || !b->lps_.BoundMaxX()) {
+        if ((!b->lps_.BoundMinX() &&
+             abs(0.5 - nearest_pmn(0.5, bounce_walk::tgt_yaw)) <= 0.25) ||
+            (!b->lps_.BoundMaxX() &&
+             abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) <= 0.25)) {
           bounce_walk::tgt_yaw = 0.5 - bounce_walk::tgt_yaw;
-          start_muteki = true;
+          bounce_walk::reinit = true;
+
+          Serial.println("X OUT");
+          Serial.println("Bounced tgt_yaw ");
+          Serial.println(bounce_walk::tgt_yaw);
         }
-        if (!b->lps_.BoundMinY() || !b->lps_.BoundMaxY()) {
+
+        if ((!b->lps_.BoundMinY() &&
+             abs(-0.25 - nearest_pmn(-0.25, bounce_walk::tgt_yaw)) <= 0.25) ||
+            (!b->lps_.BoundMaxY() &&
+             abs(0.25 - nearest_pmn(0.25, bounce_walk::tgt_yaw)) <= 0.25)) {
           bounce_walk::tgt_yaw *= -1.0;
-          start_muteki = true;
+          bounce_walk::reinit = true;
+
+          Serial.println("Y OUT");
+          Serial.println("Bounced tgt_yaw ");
+          Serial.println(bounce_walk::tgt_yaw);
         }
 
-        if (start_muteki) {
-          bounce_walk::muteki_until = millis() + 5000;
-        }
+        // if (!b->lps_.BoundMinY() || !b->lps_.BoundMaxY()) {
+        //   return true;
+        //   Serial.println("Y NOT Bound");
+        //   bounce_walk::tgt_yaw *= -1.0;
+        //   start_muteki = true;
+        // }
+        // if (start_muteki) {
+        //   Serial.println("Start Muteki");
+        //   bounce_walk::muteki_until = millis() + 5000;
+        // }
+        // if (reinit) {
+        //   b->cmd_.set_phis.exit_condition = [](Basilisk*) { return true; };
+        //   b->cmd_.pivseq.exit_condition = [](Basilisk*) { return true; };
+        //   b->cmd_.pivseq.exit_to_mode = M::BounceWalk;
+        // }
 
-        return false;
+        return bounce_walk::reinit;
       };
+      w.exit_to_mode = M::BounceWalk_Reinit;
+    } break;
+    case M::BounceWalk_Reinit: {
+      bounce_walk::reinit = false;
+      m = M::Walk;
     } break;
     default:
       break;

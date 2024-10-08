@@ -13,7 +13,7 @@
 Basilisk::Configuration cfg{
     .suid =
         [] {
-          uint8_t suid = 8;  // 8th Basilisk Teensy replaced to a new one.
+          uint8_t suid = 0;
           const auto teensyid = GetTeensyId();
           if (teensyid_to_suid.find(teensyid) != teensyid_to_suid.end()) {
             suid = teensyid_to_suid.at(teensyid);
@@ -21,13 +21,13 @@ Basilisk::Configuration cfg{
           return suid;
         }(),  //
     .servo{.id_l = 1, .id_r = 2, .bus = 1},
-    .lps{.c = 300.0,
-         .x_c = 150.0,
-         .y_c = 370.0,
-         .minx = 50.0,
-         .maxx = 250.0,
-         .miny = 50.0,
-         .maxy = 250.0},
+    .lps{.c = 860.0,
+         .x_c = 430.0,
+         .y_c = 910.0,
+         .minx = 100.0,
+         .maxx = 760.0,
+         .miny = 100.0,
+         .maxy = 810.0},
     .lego{.pin_l = 23, .pin_r = 29, .run_interval = 20},  //
     .mags{.pin_la = 3,
           .pin_lt = 4,
@@ -44,10 +44,14 @@ XbeeCommandReceiver xb_cr;
 Neokey nk = specifics::neokey1x4_i2c0;
 NeokeyCommandReceiver nk_cr{nk};
 
+// ReplySenders.
+XbeeReplySender xb_rs;
+
 void setup() {
   Serial.begin(9600);
   delay(250);
 
+  Serial.println("******************************************");
   Serial.print("Basilisk SUID set to ");
   Serial.println(b.cfg_.suid);
   delay(250);
@@ -58,7 +62,11 @@ void setup() {
   }
   xb_cr.Setup(&b);
   nk_cr.Setup(&b);
+  xb_rs.Setup(&b);
   delay(250);
+
+  Serial.println("setup() done");
+  Serial.println("******************************************");
 }
 
 void loop() {
@@ -75,6 +83,6 @@ void loop() {
   static Beat led_rs_beat{1};
   if (led_rs_beat.Hit()) LedReplySender(nk);
 
-  static Beat serial_rs_beat{1000};
-  if (serial_rs_beat.Hit()) SerialReplySender(b);
+  // static Beat serial_rs_beat{2000};
+  // if (serial_rs_beat.Hit()) SerialReplySender(b);
 }

@@ -39,7 +39,7 @@ void ModeRunners::Walk(Basilisk* b) {
       };
       ps.steps = c.steps;
       ps.exit_condition = c.exit_condition;
-      ps.exit_to_mode = M::Idle_Init;
+      ps.exit_to_mode = c.exit_to_mode;
     } break;
     default:
       break;

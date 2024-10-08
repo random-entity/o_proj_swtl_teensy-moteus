@@ -10,8 +10,24 @@
 
 class XbeeReplySender {
  public:
+  inline static bool waiting_send = false;
+  inline static uint32_t send_at_us;
+  inline static Basilisk* b_;
+  inline static uint32_t TEMP_start_bytes_us;
+
+  // Should be called before use.
+  inline static bool Setup(Basilisk* b) {
+    if (!b) {
+      Serial.println("XbeeReplySender: Null reference to Basilisk");
+      return false;
+    }
+    b_ = b;
+    xbee_rpl_.decoded.suids = 1 << (b->cfg_.suid - 1);
+    Serial.println("XbeeReplySender: Setup complete");
+    return true;
+  }
+
   inline static void Send(Basilisk::Reply rpl) {
-    xbee_rpl_.decoded.suids = 1 << (*rpl.suid - 1);
     xbee_rpl_.decoded.mode = static_cast<uint8_t>(*rpl.mode);
     xbee_rpl_.decoded.lpsx = static_cast<float>(*rpl.lpsx);
     xbee_rpl_.decoded.lpsy = static_cast<float>(*rpl.lpsy);

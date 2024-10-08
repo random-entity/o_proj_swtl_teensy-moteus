@@ -132,6 +132,7 @@ class Basilisk {
 
   struct Command {
     uint8_t oneshots;  // Refer to utils.h for bit mapping.
+                       // Poll and Reply are handled independent of Executer.
 
     struct SetBaseYaw {
       double offset;
@@ -230,7 +231,8 @@ class Basilisk {
       Orbit = 24,
       Diamond = 25,
       RandomWalk = 26,
-      BounceWalk = 27,
+      BounceWalk_Init = 27,
+      BounceWalk_Reinit = 28,
 
       /* Gee: */
       Shear_Init = 250,
@@ -337,6 +339,7 @@ class Basilisk {
       uint32_t interval[2];                     // [0]: l, [1]: r (didimbal)
       uint8_t steps;                            // Counting both feet.
       bool (*exit_condition)(Basilisk*);  // Passed down to PivSeq AND Pivot.
+      Mode exit_to_mode;
     } walk;
 
     struct WalkToDir {

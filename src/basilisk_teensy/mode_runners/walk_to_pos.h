@@ -44,6 +44,7 @@ void ModeRunners::WalkToPos(Basilisk* b) {
         const auto& c = b->cmd_.walk_to_pos;
         return b->lps_.GetPos().dist(c.tgt_pos) < abs(c.dist_thr);
       };
+      w.exit_to_mode = M::Idle_Init;
     } break;
     default:
       break;
