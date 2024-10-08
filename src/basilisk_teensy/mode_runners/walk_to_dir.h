@@ -39,7 +39,7 @@ void ModeRunners::WalkToDir(Basilisk* b) {
       }
       w.steps = c.steps;
       w.exit_condition = [](Basilisk* b) {
-        return !(b->lps_.Bound()) || !!(b->Collision());
+        return !(b->lps_.Bound()) || !!(b->BoundaryCollision());
       };
       w.exit_to_mode = M::Idle_Init;
     } break;

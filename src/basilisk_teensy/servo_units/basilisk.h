@@ -38,7 +38,7 @@ class Basilisk {
   } cfg_;
 
   const double gr_ = 21.0;  // delta_rotor = delta_output * gear_ratio
-  const double collision_thr = 100.0;
+  const double coll_thr_ = 100.0;
   const PmCmd* const pm_cmd_template_;
 
   /////////////////
@@ -444,16 +444,18 @@ class Basilisk {
     for (auto* s : s_) c(s);
   }
 
-  uint16_t Collision() {
+  uint16_t BoundaryCollision() {
     uint16_t collision = 0;
+
+    const auto my_pos = lps_.GetPos();
 
     for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
       if (other_suid == cfg_.suid) continue;
 
-      const auto other = roster::db[other_suid - 1];
+      const auto& other = roster::db[other_suid - 1];
       const auto other_pos = Vec2{other.x, other.y};
-      const auto dist = lps_.GetPos().dist(other_pos);
-      if (dist < collision_thr) {
+
+      if ((other_pos - my_pos).mag() < coll_thr_) {
         collision |= (1 << (other_suid - 1));
       }
     }

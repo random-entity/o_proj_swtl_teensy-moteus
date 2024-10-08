@@ -1,3 +1,5 @@
+// Might NOT work with catwalk.
+
 #pragma once
 
 #include "meta.h"
@@ -46,41 +48,33 @@ void ModeRunners::BounceWalk(Basilisk* b) {
       }
       w.steps = -1;
       w.exit_condition = [](Basilisk* b) {
-        // if (millis() <= bounce_walk::muteki_until) {
-        //   // Serial.println("MUTEKI");
-        //   return false;
-        // }
-        // bool start_muteki = false;
-        // const auto collision = b->Collision();
-        // Vec2 yaw_sum{};
-        // for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
-        //   if (other_suid == b->cfg_.suid) continue;
-        //   if (!(collision & (1 << (other_suid - 1)))) continue;
-        //   yaw_sum.add(Vec2{roster::db[other_suid - 1].yaw});
-        //   start_muteki = true;
-        // }
-        // if (start_muteki) {
-        //   bounce_walk::tgt_yaw = yaw_sum.arg();
-        // }
-        // if ((b->lps_.TrespassedMinX() &&
-        //      abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) >= 0.25) ||
-        //     (b->lps_.TrespassedMaxX() &&
-        //      abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) <= 0.25)) {
-        //   bounce_walk::tgt_yaw = 0.5 - bounce_walk::tgt_yaw;
-        //   for (int i = 0; i < 10; i++) Serial.println("TrespassedX");
-        //   Serial.print("Bouced tgt_yaw -> ");
-        //   Serial.println(bounce_walk::tgt_yaw);
-        //   start_muteki = true;
-        // }
-        // if (b->lps_.TrespassedMinY() || b->lps_.TrespassedMaxY()) {
-        //   bounce_walk::tgt_yaw *= -1.0;
-        //   for (int i = 0; i < 10; i++) Serial.println("TrespassedY");
-        //   Serial.print("Bouced tgt_yaw -> ");
-        //   Serial.println(bounce_walk::tgt_yaw);
-        //   start_muteki = true;
-        // }
-
         if (bounce_walk::reinit) return true;
+
+        const auto my_pos = b->lps_.GetPos();
+        const auto my_tgt_yaw = bounce_walk::tgt_yaw;
+
+        Vec2 new_tgt_yaw{0.0, 0.0};
+
+        for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
+          if (other_suid == b->cfg_.suid) continue;
+
+          const auto& other = roster::db[other_suid - 1];
+          const auto other_pos = Vec2{other.x, other.y};
+
+          const auto dist_vec = other_pos - my_pos;
+
+          if (dist_vec.mag() > b->coll_thr_) continue;
+
+          const auto at_front =
+              abs(nearest_pmn(0.0, dist_vec.arg() - my_tgt_yaw)) < 0.25;
+          if (!at_front) continue;
+
+          // At this point, the other is in collision boundary and at front.
+          new_tgt_yaw = new_tgt_yaw + Vec2{dist_vec.arg() + 0.5};
+          bounce_walk::reinit = true;
+        }
+
+        if (bounce_walk::reinit) bounce_walk::tgt_yaw = new_tgt_yaw.arg();
 
         if ((!b->lps_.BoundMinX() &&
              abs(0.5 - nearest_pmn(0.5, bounce_walk::tgt_yaw)) <= 0.25) ||
@@ -88,10 +82,6 @@ void ModeRunners::BounceWalk(Basilisk* b) {
              abs(nearest_pmn(0.0, bounce_walk::tgt_yaw)) <= 0.25)) {
           bounce_walk::tgt_yaw = 0.5 - bounce_walk::tgt_yaw;
           bounce_walk::reinit = true;
-
-          Serial.println("X OUT");
-          Serial.println("Bounced tgt_yaw ");
-          Serial.println(bounce_walk::tgt_yaw);
         }
 
         if ((!b->lps_.BoundMinY() &&
@@ -100,27 +90,7 @@ void ModeRunners::BounceWalk(Basilisk* b) {
              abs(0.25 - nearest_pmn(0.25, bounce_walk::tgt_yaw)) <= 0.25)) {
           bounce_walk::tgt_yaw *= -1.0;
           bounce_walk::reinit = true;
-
-          Serial.println("Y OUT");
-          Serial.println("Bounced tgt_yaw ");
-          Serial.println(bounce_walk::tgt_yaw);
         }
-
-        // if (!b->lps_.BoundMinY() || !b->lps_.BoundMaxY()) {
-        //   return true;
-        //   Serial.println("Y NOT Bound");
-        //   bounce_walk::tgt_yaw *= -1.0;
-        //   start_muteki = true;
-        // }
-        // if (start_muteki) {
-        //   Serial.println("Start Muteki");
-        //   bounce_walk::muteki_until = millis() + 5000;
-        // }
-        // if (reinit) {
-        //   b->cmd_.set_phis.exit_condition = [](Basilisk*) { return true; };
-        //   b->cmd_.pivseq.exit_condition = [](Basilisk*) { return true; };
-        //   b->cmd_.pivseq.exit_to_mode = M::BounceWalk;
-        // }
 
         return bounce_walk::reinit;
       };
