@@ -233,6 +233,7 @@ class Basilisk {
       RandomWalk = 26,
       BounceWalk_Init = 27,
       BounceWalk_Reinit = 28,
+      WalkToPosInField = 29,
 
       /* Gee: */
       Shear_Init = 250,
@@ -398,6 +399,10 @@ class Basilisk {
     struct BounceWalk {
       double init_tgt_yaw;
     } bounce_walk;
+
+    struct WalkToPosInField {
+      Vec2 tgt_pos;
+    } walk_to_pos_in_field;
 
     struct Shear {
       AnkToe fix_which;

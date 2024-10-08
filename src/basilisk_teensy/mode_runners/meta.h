@@ -24,6 +24,7 @@ struct ModeRunners {
   static void Orbit(Basilisk*);
   static void Diamond(Basilisk*);
   static void BounceWalk(Basilisk*);
+  static void WalkToPosInField(Basilisk*);
   static void Shear(Basilisk*);
 
   inline static const std::map<M, void (*)(Basilisk*)> mode_runners = {
@@ -51,6 +52,7 @@ struct ModeRunners {
       {M::Diamond, &Diamond},
       {M::BounceWalk_Init, &BounceWalk},
       {M::BounceWalk_Reinit, &BounceWalk},
+      {M::WalkToPosInField, &WalkToPosInField},
       {M::Shear_Init, &Shear},
       {M::Shear_Move, &Shear},
   };
