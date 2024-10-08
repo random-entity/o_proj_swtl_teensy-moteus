@@ -4,6 +4,8 @@
 
 namespace globals {
 
+elapsedMicros poll_clk_us;
+
 namespace stdval {
 
 namespace speed {

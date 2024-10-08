@@ -73,6 +73,7 @@ void loop() {
   b.Run();
 
   xb_cr.Run();
+  xb_rs.Run();
 
   static Beat nk_cr_beat{10};
   if (nk_cr_beat.Hit()) nk_cr.Run();

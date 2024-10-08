@@ -28,7 +28,7 @@ using AttRel = bool;
 #define ONESHOT_CRMuxXbee (0)
 #define ONESHOT_SetBaseYaw (1)
 #define ONESHOT_Inspire (2)
-#define ONESHOT_ReplyNext (3)
+#define ONESHOT_GlobalPoll (3)
 #define ONESHOT_SaveOthersReply (4)
 
 const uint64_t one_uint64 = static_cast<uint64_t>(1);
