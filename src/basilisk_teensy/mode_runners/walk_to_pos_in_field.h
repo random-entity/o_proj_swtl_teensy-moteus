@@ -10,7 +10,6 @@ bool moonwalk;
 
 void ModeRunners::WalkToPosInField(Basilisk* b) {
   auto& m = b->cmd_.mode;
-  auto& c = b->cmd_.walk_to_pos_in_field;
   auto& w = b->cmd_.walk;
 
   switch (m) {

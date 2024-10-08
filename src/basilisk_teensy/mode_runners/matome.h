@@ -18,3 +18,4 @@
 #include "walk.h"
 #include "walk_to_dir.h"
 #include "walk_to_pos.h"
+#include "walk_to_pos_in_field.h"
