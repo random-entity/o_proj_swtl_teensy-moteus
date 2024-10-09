@@ -13,7 +13,7 @@
 Basilisk::Configuration cfg{
     .suid =
         [] {
-          uint8_t suid = 0;
+          uint8_t suid = 13;  // SUID 13 can't find its TeensyID from map.
           const auto teensyid = GetTeensyId();
           if (teensyid_to_suid.find(teensyid) != teensyid_to_suid.end()) {
             suid = teensyid_to_suid.at(teensyid);

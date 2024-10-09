@@ -383,7 +383,7 @@ class Basilisk {
 
     struct Orbit {
       Vec2 center;
-      double tick;
+      double radius;
     } orbit;
 
     struct Diamond {

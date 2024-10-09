@@ -60,8 +60,8 @@ class NeokeyCommandReceiver {
       } break;
       case 4: {
         b_->crmux_ = Basilisk::CRMux::Xbee;
-        // tests::BounceWalk(b_);
-        tests::WalkToPosInField(b_);
+        tests::BounceWalk(b_);
+        // tests::WalkToPosInField(b_);
       } break;
       default: {  // Whatever left keys are assigned Idle Mode.
         m = M::Idle_Init;
