@@ -57,6 +57,8 @@ class XbeeReplySender {
     xbee_rpl_.decoded.lpsx = static_cast<float>(*b_->rpl_.lpsx);
     xbee_rpl_.decoded.lpsy = static_cast<float>(*b_->rpl_.lpsy);
     xbee_rpl_.decoded.yaw = static_cast<float>(b_->rpl_.yaw());
+    xbee_rpl_.decoded.phi_l = static_cast<float>(b_->rpl_.phi_l());
+    xbee_rpl_.decoded.phi_r = static_cast<float>(b_->rpl_.phi_r());
 
     XBEE_SERIAL.write(xbee_rpl_.raw_bytes,
                       XBEE_PACKET_LEN_INCLUDING_START_BYTES);
@@ -71,6 +73,8 @@ class XbeeReplySender {
       float lpsx;
       float lpsy;
       float yaw;
+      float phi_l;
+      float phi_r;
     } __attribute__((packed)) decoded;
     uint8_t raw_bytes[XBEE_PACKET_LEN_INCLUDING_START_BYTES];
 

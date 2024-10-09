@@ -38,7 +38,7 @@ class Basilisk {
   } cfg_;
 
   const double gr_ = 21.0;  // delta_rotor = delta_output * gear_ratio
-  const double coll_thr_ = 100.0;
+  const double coll_thr_ = 200.0;
   const PmCmd* const pm_cmd_template_;
 
   /////////////////
@@ -437,6 +437,8 @@ class Basilisk {
     double* lpsx;
     double* lpsy;
     double yaw() { return b->imu_.GetYaw(true); }
+    double phi_l() { return b->l_.GetReply().abs_position; }
+    double phi_r() { return b->r_.GetReply().abs_position; };
 
     bool notnull() { return !!b && !!suid && !!mode && !!lpsx && !!lpsy; }
   } rpl_;

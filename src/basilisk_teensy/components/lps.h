@@ -47,7 +47,7 @@ class Lps {
       return false;
     }
 
-    for (auto& dist_sm : dists_sm_) dist_sm.begin(SMOOTHED_AVERAGE, 5);
+    for (auto& dist_sm : dists_sm_) dist_sm.begin(SMOOTHED_AVERAGE, 10);
 
     Serial.println("LPS: Setup complete");
     return true;

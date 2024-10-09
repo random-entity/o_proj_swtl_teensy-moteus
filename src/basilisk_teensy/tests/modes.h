@@ -104,7 +104,15 @@ void BounceWalk(Basilisk* b) {
   auto& c = b->cmd_.bounce_walk;
 
   m = M::BounceWalk_Init;
-  c.init_tgt_yaw = 0.0;  // random(360) / 360.0;
+  c.init_tgt_yaw = random(360) / 360.0;
+}
+
+void WalkToPosInField(Basilisk* b) {
+  auto& m = b->cmd_.mode;
+  auto& c = b->cmd_.walk_to_pos_in_field;
+
+  m = M::WalkToPosInField;
+  c.tgt_pos = Vec2{700.0, 700.0};
 }
 
 }  // namespace tests

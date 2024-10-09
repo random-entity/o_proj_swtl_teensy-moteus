@@ -25,15 +25,16 @@ void ModeRunners::WalkToPosInField(Basilisk* b) {
           const auto pure_tgt_yaw_vec = tgt_delta_pos.normalize();
           Vec2 force{0.0, 0.0};
 
-          for (uint8_t bigger_suid = b->cfg_.suid + 1; bigger_suid <= 13;
-               bigger_suid++) {
-            const auto& bigger = roster::db[bigger_suid - 1];
-            const auto bigger_pos = Vec2{bigger.x, bigger.y};
+          for (uint8_t other_suid = 1; other_suid <= 13; other_suid++) {
+            if (other_suid == b->cfg_.suid) continue;
 
-            const auto dist_vec = bigger_pos - pos;
+            const auto& other = roster::db[other_suid - 1];
+            const auto other_pos = Vec2{other.x, other.y};
+
+            const auto dist_vec = other_pos - pos;
             const auto dist = dist_vec.mag();
 
-            if (dist > b->coll_thr_ + 50.0) continue;
+            if (dist > b->coll_thr_) continue;
 
             const auto watch =
                 nearest_pmn(0.0, dist_vec.argsub(pure_tgt_yaw_vec));
@@ -41,12 +42,12 @@ void ModeRunners::WalkToPosInField(Basilisk* b) {
             const auto at_front = abs(watch) < 0.25;
             if (!at_front) continue;
 
-            // At this point, the bigger is in collision boundary and at
+            // At this point, the other is in collision boundary and at
             // front.
 
             const auto at_right = watch < 0.0;
 
-            const double r = max((dist - 25.0) * 0.1, 0.001);
+            const double r = max((dist - b->coll_thr_) * 0.1, 0.001);
             const double mag = 1.0 / sq(r);
             force = force +
                     mag * Vec2{dist_vec.arg() + (at_right ? 1.0 : -1.0) * 0.25};
