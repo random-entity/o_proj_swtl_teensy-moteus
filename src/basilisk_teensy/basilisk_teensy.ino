@@ -65,6 +65,13 @@ void setup() {
   xb_rs.Setup(&b);
   delay(250);
 
+  Serial.print("XbRS timing -> ");
+  for (uint8_t suid = 1; suid <= 13; suid++) {
+    Serial.print(timing::xb::suid_to_sndtim_us.at(suid));
+    Serial.print(", ");
+  }
+  Serial.println();
+
   Serial.println("setup() done");
   Serial.println("******************************************");
 }
@@ -84,6 +91,6 @@ void loop() {
   static Beat led_rs_beat{1};
   if (led_rs_beat.Hit()) LedReplySender(nk);
 
-  // static Beat serial_rs_beat{2000};
-  // if (serial_rs_beat.Hit()) SerialReplySender(b);
+  static Beat serial_rs_beat{2000};
+  if (serial_rs_beat.Hit()) SerialReplySender(b);
 }

@@ -71,7 +71,7 @@ class XbeeCommandReceiver {
     // Cannot pass this point if (waiting mode).
     // From this point, (receiving mode)
 
-    if (micros() > start_time_us + xb_timing::tmot_st_to_wa_us) {
+    if (micros() > start_time_us + timing::xb::tmot_st_to_wa_us) {
       Serial.println();
       Serial.print("WA ");
       Serial.println(micros() - start_time_us);

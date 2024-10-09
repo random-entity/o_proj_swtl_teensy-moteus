@@ -29,17 +29,20 @@ class XbeeReplySender {
 
   // Should be run continuously
   inline static void Run() {
-    using namespace xb_timing;
+    using namespace timing::xb;
 
-    const static auto suid_m1 = b_->cfg_.suid - 1;
-    const static uint32_t send_lb = tmot_st_to_wa_us + suid_m1 * rpl_snd_itv_us;
-    const static uint32_t send_ub = send_lb + rpl_snd_tmot_us;
+    const static auto sndtim_us = suid_to_sndtim_us.at(b_->cfg_.suid - 1);
 
     if (!waiting_send_) return;
-    if (globals::poll_clk_us < send_lb) return;
+    if (globals::poll_clk_us < sndtim_us) return;
     waiting_send_ = false;
-    if (globals::poll_clk_us >= send_ub) return;
+    if (globals::poll_clk_us >= sndtim_us + rpl_snd_tmot_us) {
+      Serial.println("RS timeout");
+      return;
+    }
 
+    Serial.println("********");
+    Serial.println("My Reply");
     Serial.print("RB ");
     Serial.println(globals::poll_clk_us);
 
