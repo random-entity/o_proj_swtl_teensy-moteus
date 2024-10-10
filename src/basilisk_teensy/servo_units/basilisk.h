@@ -269,7 +269,7 @@ class Basilisk {
     struct SetPhis {
       Phi tgt_phi[2];  // [0]: l, [1]: r
                        // NaN means fix phi (speed and acclim ignored).
-      PhiSpeed* tgt_phispeed[2];   // [0]: l, [1]: r
+      PhiSpeed tgt_phispeed[2];   // [0]: l, [1]: r
       PhiAccLim tgt_phiacclim[2];  // [0]: l, [1]: r
       PhiThr damp_thr;
       PhiThr fix_thr;
