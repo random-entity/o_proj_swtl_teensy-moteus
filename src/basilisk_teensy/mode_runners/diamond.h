@@ -13,16 +13,20 @@ void ModeRunners::Diamond(Basilisk* b) {
 
   switch (m) {
     case M::Diamond: {
+      diamond::init_yaw = b->imu_.GetYaw(true);
+      c.init_stride = nearest_pmn(0.0, c.init_stride);
+
       m = M::PivSeq_Init;
       ps.pivots = [](Basilisk* b, int idx) {
         auto& c = b->cmd_.diamond;
         Basilisk::Command::Pivot p;
         p.didimbal = idx % 2 == 0 ? c.init_didimbal : !c.init_didimbal;
         p.tgt_yaw = [](Basilisk*) { return diamond::init_yaw; };
-        c.init_stride = nearest_pmn(0.0, c.init_stride);
         p.stride = idx % 4 <= 1         ? c.init_stride
                    : c.init_stride >= 0 ? c.init_stride - 0.5
                                         : c.init_stride + 0.5;
+        p.bend[IDX_L] = 0.0;
+        p.bend[IDX_R] = 0.0;
         p.speed = c.speed;
         p.acclim = c.acclim;
         p.min_dur = c.min_stepdur;
@@ -35,7 +39,7 @@ void ModeRunners::Diamond(Basilisk* b) {
         return c.interval;
       };
       ps.steps = c.steps;
-      ps.exit_condition = [](Basilisk*) { return false; };
+      ps.exit_condition = nullptr;
       ps.exit_to_mode = M::Idle_Init;
     } break;
     default:

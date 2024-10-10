@@ -16,8 +16,8 @@ void Pivot(Basilisk* b) {
   c.stride = 0.125;
   c.bend[IDX_L] = 0.0;
   c.bend[IDX_R] = -0.125;
-  c.speed = globals::stdval::speed::normal;
-  c.acclim = globals::stdval::acclim::normal;
+  c.speed = globals::stdval::speed::fast;
+  c.acclim = globals::stdval::acclim::standard;
   c.min_dur = 2000;
   c.max_dur = -1;
   c.exit_to_mode = M::Idle_Init;
@@ -35,10 +35,25 @@ void PivSpin(Basilisk* b) {
   c.bend[IDX_L] = 0.0;
   c.bend[IDX_R] = 0.0;
   c.speed = globals::stdval::speed::normal;
-  c.acclim = globals::stdval::acclim::normal;
+  c.acclim = globals::stdval::acclim::standard;
   c.min_stepdur = 0;
   c.max_stepdur = -1;
   c.interval = 0;
+  c.steps = -1;
+}
+
+void Diamond(Basilisk* b) {
+  auto& m = b->cmd_.mode;
+  auto& c = b->cmd_.diamond;
+
+  m = M::Diamond;
+  c.init_didimbal = BOOL_L;
+  c.init_stride = 0.3;
+  c.speed = globals::stdval::speed::fast;
+  c.acclim = globals::stdval::acclim::standard;
+  c.min_stepdur = 0;
+  c.max_stepdur = -1;
+  c.interval = 100;
   c.steps = -1;
 }
 
@@ -53,7 +68,7 @@ void WalkToDir(Basilisk* b) {
   c.bend[IDX_L] = 0.0;
   c.bend[IDX_R] = 0.0;
   c.speed = globals::stdval::speed::normal;
-  c.acclim = globals::stdval::acclim::normal;
+  c.acclim = globals::stdval::acclim::standard;
   c.min_stepdur = 1000;
   c.max_stepdur = 3000;
   c.interval = 0;
@@ -73,7 +88,7 @@ void WalkToPos(Basilisk* b) {
   c.bend[IDX_L] = 0.0;
   c.bend[IDX_R] = 0.0;
   c.speed = globals::stdval::speed::normal;
-  c.acclim = globals::stdval::acclim::normal;
+  c.acclim = globals::stdval::acclim::standard;
   c.min_stepdur = 1000;
   c.max_stepdur = 3000;
   c.interval = 0;
@@ -92,7 +107,7 @@ void Sufi(Basilisk* b) {
   c.bend[IDX_L] = 0.0;
   c.bend[IDX_R] = 0.0;
   c.speed = globals::stdval::speed::normal;
-  c.acclim = globals::stdval::acclim::normal;
+  c.acclim = globals::stdval::acclim::standard;
   c.min_stepdur = 1000;
   c.max_stepdur = 3000;
   c.interval = 0;
@@ -112,7 +127,7 @@ void WalkToPosInField(Basilisk* b) {
   auto& c = b->cmd_.walk_to_pos_in_field;
 
   m = M::WalkToPosInField;
-  c.tgt_pos = Vec2{700.0, 700.0};
+  c.tgt_pos = Vec2{500.0, 500.0};
 }
 
 }  // namespace tests

@@ -41,7 +41,7 @@ void ModeRunners::BounceWalk(Basilisk* b) {
         };
         w.bend[f] = 0.0;
         w.speed[f] = globals::stdval::speed::normal;
-        w.acclim[f] = globals::stdval::acclim::normal;
+        w.acclim[f] = globals::stdval::acclim::standard;
         w.min_stepdur[f] = 0;
         w.max_stepdur[f] = globals::stdval::maxdur::safe;
         w.interval[f] = 0;

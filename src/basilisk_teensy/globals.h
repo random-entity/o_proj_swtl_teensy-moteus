@@ -9,11 +9,16 @@ elapsedMicros poll_clk_us;
 namespace stdval {
 
 namespace speed {
+PhiSpeed slower = 0.05;
+PhiSpeed slow = 0.075;
 PhiSpeed normal = 0.1;
+PhiSpeed fast = 0.2;
+PhiSpeed faster = 0.3;
 }  // namespace speed
 
 namespace acclim {
-PhiAccLim normal = 2.0;
+PhiAccLim standard = 2.0;
+PhiAccLim stiff = 4.0;
 }
 
 namespace maxdur {

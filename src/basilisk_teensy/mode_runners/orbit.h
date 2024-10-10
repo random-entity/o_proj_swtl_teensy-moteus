@@ -30,7 +30,7 @@ void ModeRunners::Orbit(Basilisk* b) {
         w.stride[f] = [](Basilisk* b) { return 0.125; };
         w.bend[f] = 0.0;
         w.speed[f] = globals::stdval::speed::normal;
-        w.acclim[f] = globals::stdval::acclim::normal;
+        w.acclim[f] = globals::stdval::acclim::standard;
         w.min_stepdur[f] = 0;
         w.max_stepdur[f] = globals::stdval::maxdur::safe;
         w.interval[f] = 0;

@@ -3,6 +3,29 @@
 #include "../presets/matome.h"
 #include "meta.h"
 
+// * Meta
+// 50000 Idle
+// 50001 Free
+// 50002 CRMuxXbee
+// 50003 SetBaseYaw(0)
+// 50004 SetBaseYaw(-0.25)
+
+// * Specific
+// 1 ~ 4 Tibu
+// 5 ~ 16 Pivot nogadas (deprecated)
+// 23 ~ 24 RandomTibutibu
+// 30 ~ 34 Change global SetPhis speed
+// 50 ~ 51 Diamond
+// 99 BounceWalk(tgt_yaw = random)
+
+// * PPP
+// 1000 ~ 2999 Pivot
+// 3100 ~ 3299 PivSpin
+// 3300 ~ 3399 Sufi
+// 4000 ~ 4999 WalkToDir
+// 10000 ~ 19999 WalkToPos
+// 20000 ~ 29999 WalkToPosInField
+
 namespace do_preset {
 
 namespace pivot {
@@ -76,7 +99,7 @@ void ModeRunners::DoPreset(Basilisk* b) {
                         : digits[0] == 5 ? 0.25
                                          : 0.0;
         c.speed = do_preset::pivot::speed;
-        c.acclim = globals::stdval::acclim::normal;
+        c.acclim = globals::stdval::acclim::standard;
         c.min_dur = 0;
         c.max_dur = globals::stdval::maxdur::safe;
         c.exit_condition = nullptr;
@@ -119,7 +142,7 @@ void ModeRunners::DoPreset(Basilisk* b) {
         }
         for (uint8_t f : IDX_LR) c.bend[f] = 0.0;
         c.speed = do_preset::piv_spin::speed;
-        c.acclim = globals::stdval::acclim::normal;
+        c.acclim = globals::stdval::acclim::standard;
         c.min_stepdur = 0;
         c.max_stepdur = globals::stdval::maxdur::safe;
         c.interval = 0;
@@ -158,7 +181,7 @@ void ModeRunners::DoPreset(Basilisk* b) {
         }
         for (uint8_t f : IDX_LR) c.bend[f] = 0.0;
         c.speed = do_preset::piv_spin::speed;
-        c.acclim = globals::stdval::acclim::normal;
+        c.acclim = globals::stdval::acclim::standard;
         c.min_stepdur = 0;
         c.max_stepdur = globals::stdval::maxdur::safe;
         c.interval = 0;
@@ -226,11 +249,32 @@ void ModeRunners::DoPreset(Basilisk* b) {
         c.stride = 0.125;
         for (uint8_t f : IDX_LR) c.bend[f] = 0.0;
         c.speed = globals::stdval::speed::normal;
-        c.acclim = globals::stdval::acclim::normal;
+        c.acclim = globals::stdval::acclim::standard;
         c.min_stepdur = 0;
         c.max_stepdur = globals::stdval::maxdur::safe;
         c.interval = 0;
         c.steps = -1;
+
+        return;
+      }
+
+      if (20000 <= idx && idx <= 29999) {  // PPP WalkToPosInField range
+                                           // Decimal 1ABCD
+                                           // (AB) = tgt_pos_x
+                                           //          == (AB) * 10cm
+                                           // (CD) = tgt_pos_y
+                                           //          == (CD) * 10cm
+        uint8_t digits[4];
+        for (uint8_t i = 0; i < 4; i++) {
+          digits[i] = idx % 10;
+          idx /= 10;
+        }
+
+        m = M::WalkToPosInField;
+        auto& c = b->cmd_.walk_to_pos_in_field;
+        double x = (10 * digits[3] + digits[2]) * 10.0;
+        double y = (10 * digits[1] + digits[0]) * 10.0;
+        c.tgt_pos = Vec2{x, y};
 
         return;
       }
@@ -242,17 +286,17 @@ void ModeRunners::DoPreset(Basilisk* b) {
         (*maybe_preset)(b);
       } else if (idx != 0) {
         Serial.println("Unregistered Preset index");
-        m = M::SetMags_Init;
-        for (uint8_t i = 0; i < 4; i++) {
-          b->cmd_.set_mags.strengths[i] = MagStren::Min;
-        }
-        for (uint8_t i = 0; i < 2; i++) {
-          b->cmd_.set_mags.expected_state[i] = BOOL_RELEASE;
-        }
-        b->cmd_.set_mags.verif_thr = 1;
-        b->cmd_.set_mags.min_dur = 0;
-        b->cmd_.set_mags.max_dur = 100;
-        b->cmd_.set_mags.exit_to_mode = M::Idle_Init;
+        // m = M::SetMags_Init;
+        // for (uint8_t i = 0; i < 4; i++) {
+        //   b->cmd_.set_mags.strengths[i] = MagStren::Min;
+        // }
+        // for (uint8_t i = 0; i < 2; i++) {
+        //   b->cmd_.set_mags.expected_state[i] = BOOL_RELEASE;
+        // }
+        // b->cmd_.set_mags.verif_thr = 1;
+        // b->cmd_.set_mags.min_dur = 0;
+        // b->cmd_.set_mags.max_dur = 100;
+        // b->cmd_.set_mags.exit_to_mode = M::Idle_Init;
       }
     } break;
     default:

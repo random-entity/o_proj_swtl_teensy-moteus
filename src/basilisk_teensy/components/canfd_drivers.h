@@ -3,7 +3,7 @@
 #include "../helpers/imports.h"
 
 // The following pins are selected for the SeoulOpenMedia T4_CanFD board v1.5.
-// Only Busses 1 and 2 work for now.
+// Only Buses 1 and 2 work for now.
 #define MCP2518FD_CS_BUS1 10
 #define MCP2518FD_INT_BUS1 41
 #define MCP2518FD_CS_BUS2 9

@@ -14,8 +14,6 @@ class Executer {
       if (XbeeCommandReceiver::xb_cmd_.decoded.oneshots &
           (1 << ONESHOT_CRMuxXbee)) {
         b_->cmd_.oneshots |= (1 << ONESHOT_CRMuxXbee);
-        XbeeCommandReceiver::xb_cmd_.decoded.oneshots &=
-            ~(1 << ONESHOT_CRMuxXbee);
         XbeeCommandReceiver::waiting_parse_ = false;
       }
       if (XbeeCommandReceiver::xb_cmd_.decoded.mode ==

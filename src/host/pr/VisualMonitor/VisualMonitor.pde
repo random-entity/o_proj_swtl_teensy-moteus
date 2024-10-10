@@ -5,6 +5,7 @@ XbRR rr;
 
 // ALL lengths in cm
 final float stageDimX = 860, stageDimY = 910;
+final float lpsBoundMinX = 150, lpsBoundMaxX = 710, lpsBoundMinY = 150, lpsBoundMaxY = 760;
 float marginX, marginY;
 
 ArrayList<Basilisk> bs;
@@ -43,7 +44,7 @@ void draw() {
   rect(0, 0, stageDimX, stageDimY);
 
   // Draw LPS boundary
-  rect(150, 150, 710 - 150, 760 - 150);
+  rect(lpsBoundMinX, lpsBoundMinY, lpsBoundMaxX - lpsBoundMinX, lpsBoundMaxY - lpsBoundMinY);
 
   // Draw Basilisks
   for (Basilisk b : bs) {

@@ -61,6 +61,9 @@ class NeokeyCommandReceiver {
       case 4: {
         b_->crmux_ = Basilisk::CRMux::Xbee;
         tests::BounceWalk(b_);
+
+        // tests::Diamond(b_);
+        // tests::Pivot(b_);
         // tests::WalkToPosInField(b_);
       } break;
       default: {  // Whatever left keys are assigned Idle Mode.

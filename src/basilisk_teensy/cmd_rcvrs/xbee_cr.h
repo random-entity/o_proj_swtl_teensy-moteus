@@ -387,10 +387,9 @@ class XbeeCommandReceiver {
     static auto& c = b_->cmd_;
     static auto& m = c.mode;
 
-    if (x.oneshots) {
-      c.oneshots = x.oneshots;
-
-      if (x.oneshots & (1 << ONESHOT_SetBaseYaw)) {
+    c.oneshots = x.oneshots;
+    if (c.oneshots) {
+      if (c.oneshots & (1 << ONESHOT_SetBaseYaw)) {
         c.set_base_yaw.offset = static_cast<double>(x.u.set_base_yaw.offset);
       }
 
@@ -400,10 +399,15 @@ class XbeeCommandReceiver {
     }
 
     const auto maybe_new_mode = static_cast<M>(x.mode);
-    if (maybe_new_mode == M::DoPreset &&
-        x.u.do_preset.idx[b_->cfg_.suid - 1] == 0)
-      return;  // Do not even switch Mode.  Previous DoPreset Command
-               // execution's future-chaining can be happening now.
+
+    if (maybe_new_mode == M::DoPreset) {
+      if (x.u.do_preset.idx[b_->cfg_.suid - 1] == 0) {
+        return;  // Do not even switch Mode.  Previous DoPreset Command
+                 // execution's future-chaining can be happening now.
+      }
+
+      c.do_preset.prev_mode = m;  // Save previous Mode before switching.
+    }
 
     m = maybe_new_mode;
     switch (m) {
