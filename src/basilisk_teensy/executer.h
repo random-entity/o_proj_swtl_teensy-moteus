@@ -45,11 +45,6 @@ class Executer {
         break;
     }
 
-#if I_WANT_DEBUG
-      // Serial.print("Mode ");
-      // Serial.println(static_cast<uint8_t>(b_->cmd_.mode));
-#endif
-
     for (uint8_t id = 0; id < 4; id++) {
       if (b_->mags_.heavenfall_warning_[id]) {
         Serial.print("Heavenfall ");

@@ -1,5 +1,3 @@
-// Might NOT work with catwalk.
-
 #pragma once
 
 #include "meta.h"
@@ -18,22 +16,17 @@ void ModeRunners::BounceWalk(Basilisk* b) {
   switch (m) {
     case M::BounceWalk_Init: {
       bounce_walk::reinit = false;
-      bounce_walk::tgt_yaw = c.init_tgt_yaw;
+      const auto cur_yaw = b->imu_.GetYaw(true);
+      bounce_walk::tgt_yaw = nearest_pmn(cur_yaw, c.init_tgt_yaw);
+      bounce_walk::moonwalk = (abs(bounce_walk::tgt_yaw - cur_yaw) > 0.25);
 
       m = M::Walk;
       w.init_didimbal = BOOL_L;
       for (LRIdx f : IDX_LR) {
         w.tgt_yaw[f] = [](Basilisk* b) {
-          const auto cur_yaw = b->imu_.GetYaw(true);
-          auto result = bounce_walk::tgt_yaw;
-          result = nearest_pmn(cur_yaw, result);
-          if (abs(result - cur_yaw) > 0.25) {
-            bounce_walk::moonwalk = true;
-            result = nearest_pmn(cur_yaw, result + 0.5);
-          } else {
-            bounce_walk::moonwalk = false;
-          }
-          return result;
+          return bounce_walk::moonwalk ? nearest_pmn(b->imu_.GetYaw(true),
+                                                     bounce_walk::tgt_yaw + 0.5)
+                                       : bounce_walk::tgt_yaw;
         };
         w.stride[f] = [](Basilisk*) {
           double result = 0.125;
@@ -98,6 +91,10 @@ void ModeRunners::BounceWalk(Basilisk* b) {
     } break;
     case M::BounceWalk_Reinit: {
       bounce_walk::reinit = false;
+      const auto cur_yaw = b->imu_.GetYaw(true);
+      bounce_walk::tgt_yaw = nearest_pmn(cur_yaw, bounce_walk::tgt_yaw);
+      bounce_walk::moonwalk = (abs(bounce_walk::tgt_yaw - cur_yaw) > 0.25);
+
       m = M::Walk;
     } break;
     default:

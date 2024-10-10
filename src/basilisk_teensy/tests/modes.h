@@ -119,7 +119,7 @@ void BounceWalk(Basilisk* b) {
   auto& c = b->cmd_.bounce_walk;
 
   m = M::BounceWalk_Init;
-  c.init_tgt_yaw = random(360) / 360.0;
+  c.init_tgt_yaw = -0.25;  //  random(360) / 360.0;
 }
 
 void WalkToPosInField(Basilisk* b) {

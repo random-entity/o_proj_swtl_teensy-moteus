@@ -41,15 +41,15 @@ class XbeeReplySender {
       return;
     }
 
-    Serial.println("********");
-    Serial.println("My Reply");
-    Serial.print("RB ");
-    Serial.println(globals::poll_clk_us);
+    // Serial.println("********");
+    // Serial.println("My Reply");
+    // Serial.print("RB ");
+    // Serial.println(globals::poll_clk_us);
 
     Send();
 
-    Serial.print("RD ");
-    Serial.println(globals::poll_clk_us);
+    // Serial.print("RD ");
+    // Serial.println(globals::poll_clk_us);
   }
 
   inline static void Send() {
