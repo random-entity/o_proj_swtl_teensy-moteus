@@ -269,8 +269,8 @@ class Basilisk {
     struct SetPhis {
       Phi tgt_phi[2];  // [0]: l, [1]: r
                        // NaN means fix phi (speed and acclim ignored).
-      PhiSpeed tgt_phispeed[2];   // [0]: l, [1]: r
-      PhiAccLim tgt_phiacclim[2];  // [0]: l, [1]: r
+      PhiSpeed (*tgt_phispeed[2])(Basilisk*);  // [0]: l, [1]: r
+      PhiAccLim tgt_phiacclim[2];              // [0]: l, [1]: r
       PhiThr damp_thr;
       PhiThr fix_thr;
       uint8_t fixing_cycles_thr;          // Exit condition priority:
@@ -285,15 +285,18 @@ class Basilisk {
                                      // and used throughout Pivot.
                                      // NaN means yaw at Pivot_Init.
       // (*.*) oO(Ignore me...)
-      double stride;  // Forward this much more from tgt_yaw.
-                      // Negative value manifests as walking backwards.
-                      // NaN means do NOT kick.
-      Phi bend[2];    // [0]: l, [1]: r
-                      // tgt_sig == tgt_yaw + bend
-                      // or bend == -tgt_phi (at stride 0)
-                      // NaN means preserve initial sig for didimbal,
-                      // initial phi for kickbal.
-      PhiSpeed speed;
+      double stride;   // Forward this much more from tgt_yaw.
+                       // Negative value manifests as walking backwards.
+                       // NaN means do NOT kick.
+      Phi bend[2];     // [0]: l, [1]: r
+                       // tgt_sig == tgt_yaw + bend
+                       // or bend == -tgt_phi (at stride 0)
+                       // NaN means preserve initial sig for didimbal,
+                       // initial phi for kickbal.
+      PhiSpeed speed;  // EMERGENCY CHANGE ahead of real performance:
+                       // Pivot::speed will be ignored and NOT be passed down
+                       // to SetPhis. SetPhis::tgt_phispeed will always be
+                       // the value of globals::var::speed.
       PhiAccLim acclim;
       uint32_t min_dur, max_dur;
       bool (*exit_condition)(Basilisk*);  // Passed down to SetPhis.

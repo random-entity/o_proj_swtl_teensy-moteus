@@ -44,7 +44,7 @@ void ModeRunners::SetPhis(Basilisk* b) {
                   pp(fixing_cycles[f]);
                 } else {
                   tgt_rtrvel =
-                      b->gr_ * c.tgt_phispeed[f] *
+                      b->gr_ * c.tgt_phispeed[f](b) *
                       /* dx/dt = -x^p where x(t=0) = 1 gives:
                        * x = e^{-t} for p = 1
                        * x = (1 - (1 - p)t)^{1 / (1 - p)} elsewhere

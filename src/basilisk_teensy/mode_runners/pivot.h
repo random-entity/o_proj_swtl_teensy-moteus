@@ -45,7 +45,9 @@ void ModeRunners::Pivot(Basilisk* b) {
       mags.exit_to_mode = M::SetPhis_Init;
       phis.tgt_phi[didim_idx] =
           b->imu_.GetYaw(true) - tgt_yaw - c.bend[didim_idx];
-      phis.tgt_phispeed[didim_idx] = c.speed;
+      phis.tgt_phispeed[didim_idx] = [](Basilisk* b) {
+        return globals::var::speed;  // b->cmd_.pivot.speed;
+      };
       phis.tgt_phiacclim[didim_idx] = c.acclim;
       phis.tgt_phi[kick_idx] = NaN;
       phis.damp_thr = 0.05;
@@ -80,8 +82,12 @@ void ModeRunners::Pivot(Basilisk* b) {
       phis.tgt_phi[didim_idx] = b->s_[didim_idx]->GetReply().abs_position +
                                 tgt_yaw - b->imu_.GetYaw(true) + sgnd_stride;
       phis.tgt_phi[kick_idx] = -c.bend[kick_idx] + sgnd_stride;
-      phis.tgt_phispeed[didim_idx] = c.speed;
-      phis.tgt_phispeed[kick_idx] = c.speed;
+      phis.tgt_phispeed[didim_idx] = [](Basilisk* b) {
+        return globals::var::speed;  // b->cmd_.pivot.speed;
+      };
+      phis.tgt_phispeed[kick_idx] = [](Basilisk* b) {
+        return globals::var::speed;  // b->cmd_.pivot.speed;
+      };
       phis.tgt_phiacclim[didim_idx] = c.acclim;
       phis.tgt_phiacclim[kick_idx] = c.acclim;
       phis.damp_thr = 0.05;
