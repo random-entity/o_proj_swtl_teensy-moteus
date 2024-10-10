@@ -74,6 +74,7 @@ void ModeRunners::WalkToPosInField(Basilisk* b) {
           }
           return field_tgt_yaw;
         };
+        w.tgt_yaw[f](b);  // Call it once to update moonwalk.
         w.stride[f] = [](Basilisk* b) {
           double result = 0.125;
           return walk_to_pos_in_field::moonwalk ? -result : result;
